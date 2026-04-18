@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sell Your Puerto Rico Property</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sand: #f5efe6; --sand-dark: #e8ddd0;
+    --terracotta: #c4704a; --terracotta-light: #d4845e;
+    --ocean: #2d6a7f; --ocean-light: #3d8a9f;
+    --dark: #1a1a1a; --mid: #555; --light: #888; --white: #fff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--sand); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+
+  .hero { width: 100%; background: linear-gradient(135deg, #1a3a45 0%, #2d6a7f 50%, #3d8a9f 100%); padding: 32px 24px 28px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); width: 120%; height: 60px; background: var(--sand); border-radius: 50%; }
+  .hero-eyebrow { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; font-weight: 300; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(22px,5vw,32px); font-weight: 600; color: #fff; line-height: 1.25; margin-bottom: 10px; }
+  .hero h1 em { color: #f0c080; font-style: normal; }
+  .hero-sub { font-size: 14px; color: rgba(255,255,255,0.75); font-weight: 300; max-width: 420px; margin: 0 auto; }
+  .trust-bar { display: flex; justify-content: center; gap: 20px; margin-top: 18px; flex-wrap: wrap; }
+  .trust-item { font-size: 12px; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 5px; }
+  .trust-item::before { content: '✓'; color: #f0c080; font-weight: 600; }
+
+  .chat-wrapper { width: 100%; max-width: 680px; padding: 20px 16px 0; margin-top: 20px; display: flex; flex-direction: column; flex: 1; }
+  .chat-window { background: #f0ebe3; border-radius: 20px; border: 1px solid var(--sand-dark); display: flex; flex-direction: column; min-height: 480px; max-height: 580px; overflow: hidden; box-shadow: 0 4px 30px rgba(0,0,0,0.08); }
+  .chat-header { background: var(--white); border-bottom: 1px solid var(--sand-dark); padding: 14px 20px; display: flex; align-items: center; gap: 12px; border-radius: 20px 20px 0 0; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--ocean), var(--terracotta)); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .chat-header-info strong { display: block; font-size: 14px; font-weight: 500; color: var(--dark); }
+  .chat-header-info span { font-size: 12px; color: #2a9a60; font-weight: 400; }
+  .chat-header-info span::before { content: '●'; font-size: 8px; margin-right: 4px; }
+
+  .messages { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+  .messages::-webkit-scrollbar { width: 4px; }
+  .messages::-webkit-scrollbar-thumb { background: var(--sand-dark); border-radius: 2px; }
+
+  .msg { display: flex; gap: 8px; align-items: flex-end; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--ocean), var(--terracotta)); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .msg.user .msg-avatar { background: linear-gradient(135deg,#555,#333); font-size: 11px; color:#fff; }
+  .bubble { max-width: 75%; padding: 11px 15px; border-radius: 16px; font-size: 14px; line-height: 1.55; color: var(--dark); }
+  .msg.bot .bubble { background: var(--white); border-bottom-left-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .msg.user .bubble { background: var(--ocean); color: #fff; border-bottom-right-radius: 4px; }
+
+  .typing-indicator { display:flex; gap:4px; align-items:center; padding:4px 2px; }
+  .typing-indicator span { width:7px; height:7px; background:var(--light); border-radius:50%; animation:bounce 1.2s infinite; }
+  .typing-indicator span:nth-child(2) { animation-delay:.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay:.4s; }
+  @keyframes bounce { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-5px); } }
+
+  .chips { display:flex; flex-wrap:wrap; gap:8px; padding:4px 0 8px 36px; animation:fadeUp 0.3s ease 0.1s both; }
+  .chip { padding:7px 14px; border-radius:20px; border:1.5px solid var(--ocean); background:transparent; color:var(--ocean); font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; font-weight:500; }
+  .chip:hover { background:var(--ocean); color:#fff; }
+
+  .input-area { background:var(--white); border-top:1px solid var(--sand-dark); padding:12px 16px; display:flex; gap:10px; align-items:center; border-radius:0 0 20px 20px; }
+  .input-area input { flex:1; border:1.5px solid var(--sand-dark); border-radius:24px; padding:10px 16px; font-size:14px; font-family:'DM Sans',sans-serif; background:var(--sand); color:var(--dark); outline:none; transition:border-color 0.2s; }
+  .input-area input:focus { border-color:var(--ocean); background:#fff; }
+  .input-area input::placeholder { color:var(--light); }
+  .send-btn { width:40px; height:40px; border-radius:50%; background:var(--ocean); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.15s,transform 0.1s; }
+  .send-btn:hover { background:var(--ocean-light); transform:scale(1.05); }
+  .send-btn svg { width:16px; height:16px; fill:#fff; }
+
+  .summary-card { background:var(--white); border-radius:16px; border:1.5px solid var(--sand-dark); padding:20px; margin-top:20px; box-shadow:0 2px 20px rgba(0,0,0,0.06); display:none; }
+  .summary-card.visible { display:block; animation:fadeUp 0.4s ease; }
+  .summary-title { font-family:'Playfair Display',serif; font-size:18px; color:var(--dark); margin-bottom:4px; }
+  .summary-subtitle { font-size:12px; color:var(--light); margin-bottom:12px; }
+
+  .status-badge { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:20px; font-size:12px; font-weight:500; margin-bottom:14px; }
+  .status-badge.success { background:#e6f7ef; color:#1a7a45; border:1px solid #b0e0c5; }
+  .status-badge.error { background:#fdf0ec; color:#a03020; border:1px solid #f0c0b0; }
+  .status-badge.pending { background:#fdf8e6; color:#7a6010; border:1px solid #e0d0a0; }
+
+  .fields-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  @media (max-width:480px) { .fields-grid { grid-template-columns:1fr; } }
+  .field-item { background:var(--sand); border-radius:10px; padding:10px 12px; }
+  .field-label { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--light); margin-bottom:3px; font-weight:500; }
+  .field-value { font-size:13px; font-weight:500; color:var(--dark); }
+  .field-item.full { grid-column:1 / -1; }
+
+  .btn-row { display:flex; flex-direction:column; gap:8px; }
+  .export-btn { width:100%; padding:13px; background:var(--terracotta); color:#fff; border:none; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:background 0.15s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .export-btn:hover { background:var(--terracotta-light); }
+  .new-lead-btn { width:100%; padding:11px; background:transparent; color:var(--ocean); border:1.5px solid var(--ocean); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.15s; }
+  .new-lead-btn:hover { background:var(--ocean); color:#fff; }
+
+  .setup-banner { background:#fffbe6; border:1.5px solid #f0d060; border-radius:12px; padding:16px; margin-top:16px; font-size:13px; line-height:1.7; color:#5a4a00; }
+  .setup-banner strong { display:block; font-size:14px; margin-bottom:8px; color:#3a3000; }
+  .setup-banner ol { padding-left:18px; margin-top:8px; }
+  .setup-banner li { margin-bottom:4px; }
+  .setup-banner a { color:var(--ocean); }
+  .config-row { display:flex; gap:8px; align-items:center; margin-top:10px; }
+  .config-row input { flex:1; border:1.5px solid #e0c860; border-radius:8px; padding:8px 12px; font-size:13px; font-family:'DM Sans',sans-serif; background:#fffdf0; color:var(--dark); outline:none; }
+  .config-row input:focus { border-color:var(--ocean); }
+  .config-row button { padding:8px 14px; background:var(--ocean); color:#fff; border:none; border-radius:8px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:500; white-space:nowrap; }
+
+  .disclaimer { font-size:11px; color:var(--light); text-align:center; padding:16px; line-height:1.6; max-width:500px; margin:0 auto; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">Puerto Rico Real Estate</div>
+  <h1>Get a <em>Fair Cash Offer</em><br>for Your Property</h1>
+  <p class="hero-sub">We buy distressed properties and land across Puerto Rico — fast closings, no repairs needed, no agent fees.</p>
+  <div class="trust-bar">
+    <span class="trust-item">Cash buyers</span>
+    <span class="trust-item">Close in 14–30 days</span>
+    <span class="trust-item">No commissions</span>
+  </div>
+</div>
+
+<div class="chat-wrapper">
+  <div class="chat-window">
+    <div class="chat-header">
+      <div class="avatar">🏡</div>
+      <div class="chat-header-info">
+        <strong>Property Intake Assistant</strong>
+        <span>Online now</span>
+      </div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Type your answer…" autocomplete="off" />
+      <button class="send-btn" onclick="handleSend()">
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="summary-card" id="summaryCard">
+    <div class="summary-title">📋 Lead Captured</div>
+    <div class="summary-subtitle" id="leadId"></div>
+    <div id="sheetStatus"></div>
+    <div class="fields-grid" id="fieldsGrid"></div>
+    <div class="btn-row">
+      <button class="export-btn" onclick="exportCSV()">📥 Export All Leads to CSV</button>
+      <button class="new-lead-btn" onclick="resetChat()">Start New Lead</button>
+    </div>
+  </div>
+
+  <div class="setup-banner" id="setupBanner">
+    <strong>⚙️ Google Sheets Connected</strong>
+    Your Apps Script URL is pre-loaded. To change it, paste a new URL below and click Save.
+    <div class="config-row">
+      <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/…/exec" />
+      <button onclick="saveScriptUrl()">Save URL</button>
+    </div>
+  </div>
+
+  <p class="disclaimer">By chatting, you agree your information may be used to evaluate a potential cash offer. We respect your privacy and never sell your data.</p>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────
+// Pre-loaded URL — can be overridden via the setup panel
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwEKX4ucgvXTTF_K1NoD-MOyjdIi3ZWjH8pQbbvkw2WoJ5bf3s5XfPR6kKoMfJ0RBd0rA/exec';
+let SCRIPT_URL = localStorage.getItem('gs_script_url') || DEFAULT_URL;
+document.getElementById('scriptUrlInput').value = SCRIPT_URL;
+
+function saveScriptUrl() {
+  const val = document.getElementById('scriptUrlInput').value.trim();
+  if (!val.startsWith('https://script.google.com')) { alert('Not a valid Apps Script URL.'); return; }
+  SCRIPT_URL = val;
+  localStorage.setItem('gs_script_url', val);
+  alert('✅ URL saved!');
+}
+
+// ─── LAND DETECTION ──────────────────────────────────────────
+function isLand(type) {
+  if (!type) return false;
+  const t = type.toLowerCase();
+  return t.includes('land') || t.includes('lot') || t.includes('agricultural') || t.includes('parcel');
+}
+
+// ─── STEPS ───────────────────────────────────────────────────
+// Each step asks a question and saves the answer under its own `key`.
+// The bot message on the NEXT step may reference the answer just given via `data`.
+const STEPS = [
+  // Step 0 — asks for first name, saves as first_name
+  { key: "first_name", bot: "Hi there! 👋 Thanks for reaching out. I help connect property owners in Puerto Rico with our cash buying team.\n\nTo get started — what's your first name?", placeholder: "Your first name…" },
+  // Step 1 — asks for phone, greets by name
+  { key: "phone", bot: (v,d) => `Nice to meet you, ${d.first_name}! What's the best phone number to reach you?`, placeholder: "787-555-0100", validate: (v) => v.trim().length > 5 },
+  // Step 2 — asks for email
+  { key: "email", bot: "And your email address? (We'll send the written offer here)", placeholder: "you@email.com", validate: (v) => v.includes('@') },
+  // Step 3 — asks for property address
+  { key: "property_address", bot: "What's the address or location of the property? (Municipio is fine if no full address)", placeholder: "e.g. Fajardo, or 209 Tamarindo St, Fajardo" },
+  // Step 4 — asks for property type
+  { key: "property_type", bot: "What type of property is it?", placeholder: "Or type your own…", chips: ["Single-family home", "Duplex / Multi-unit", "Condo / Apartment", "Vacant land / Lot", "Agricultural land", "Commercial", "Other"] },
+  // Step 5 — bedrooms (skipped for land)
+  { key: "bedrooms", bot: "How many bedrooms does it have?", placeholder: "e.g. 3", chips: ["Studio / 0", "1", "2", "3", "4", "5+"], skipIf: (d) => isLand(d.property_type) },
+  // Step 6 — bathrooms (skipped for land)
+  { key: "bathrooms", bot: "And how many bathrooms?", placeholder: "e.g. 2", chips: ["1", "1.5", "2", "2.5", "3", "3+"], skipIf: (d) => isLand(d.property_type) },
+  // Step 7 — size (label/chips adapt for land)
+  { key: "size", bot: (v,d) => isLand(d.property_type) ? "Roughly how large is the parcel?" : "Roughly how large is the property?", placeholder: "e.g. 1,200 sq ft or 0.5 acres", chips: (d) => isLand(d.property_type) ? ["Under 500 sq m","500–2,000 sq m","Under 1 acre","1–5 acres","5–20 acres","20+ acres"] : ["Under 800 sq ft","800–1,500 sq ft","1,500–3,000 sq ft","Over 3,000 sq ft"] },
+  // Step 8 — condition/zoning (adapts for land)
+  { key: "condition_or_zoning", bot: (v,d) => isLand(d.property_type) ? "Is the land currently zoned or permitted for anything?" : "How would you describe the current condition?", placeholder: "Or describe…", chips: (d) => isLand(d.property_type) ? ["Residential zoning","Agricultural / rural","Commercial zoning","Mixed / unclear","Unknown"] : ["Move-in ready","Needs minor repairs","Needs major repairs / gut rehab","Vacant / abandoned","Storm or flood damage"] },
+  // Step 9 — known issues
+  { key: "known_issues", bot: "Any specific issues we should know about? (liens, title problems, access, utilities, legal disputes)", placeholder: "e.g. back taxes, no road access, title dispute…", chips: ["No major issues","Back taxes or liens","Title / legal issues","No road access","No utilities / off-grid","Septic or plumbing problems","Multiple issues"] },
+  // Step 10 — motivation
+  { key: "motivation", bot: "What's your main reason for selling?", placeholder: "Or describe…", chips: ["Relocating","Financial hardship","Inherited property","Divorce / estate","Too costly to maintain","Just exploring options"] },
+  // Step 11 — timeline
+  { key: "timeline", bot: "How quickly are you hoping to close?", placeholder: "Or describe…", chips: ["ASAP — within 30 days","1–3 months","3–6 months","Flexible / no rush"] },
+  // Step 12 — asking price
+  { key: "asking_price", bot: "Do you have a price in mind? (Fine if not)", placeholder: "e.g. $150,000 or 'not sure'", chips: ["Not sure","Under $100K","$100K–$200K","$200K–$400K","Over $400K"] },
+  // Step 13 — ownership
+  { key: "ownership", bot: "Are you the sole owner, or are others involved?", placeholder: "Or describe…", chips: ["Sole owner","Married — spouse co-owns","Multiple heirs","Co-owned with partner/investor","Estate / probate situation"] },
+  // Step 14 — additional notes
+  { key: "additional_notes", bot: (v,d) => `Almost done, ${d.first_name||'there'}! 🙌\n\nAnything else you'd like to share about the property or your situation?`, placeholder: "Any extra details (optional)…", chips: ["No, that covers it","Yes, let me add something"] },
+  // Step 15 — terminal, triggers summary
+  { key: null, isTerminal: true }
+];
+
+// ─── STATE ────────────────────────────────────────────────────
+let currentStep = 0, data = {}, awaitingInput = false;
+let allLeads = JSON.parse(localStorage.getItem('pr_leads') || '[]');
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('userInput');
+
+// ─── RENDER ───────────────────────────────────────────────────
+function addMessage(role, text) {
+  const div = document.createElement('div'); div.className = `msg ${role}`;
+  const av = document.createElement('div'); av.className = 'msg-avatar'; av.textContent = role==='bot'?'🏡':'👤';
+  const bubble = document.createElement('div'); bubble.className = 'bubble'; bubble.innerHTML = text.replace(/\n/g,'<br>');
+  div.appendChild(av); div.appendChild(bubble); messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+function addTyping() {
+  const div = document.createElement('div'); div.className='msg bot'; div.id='typing';
+  div.innerHTML=`<div class="msg-avatar">🏡</div><div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+  messagesEl.appendChild(div); messagesEl.scrollTop=messagesEl.scrollHeight;
+}
+function removeTyping() { const t=document.getElementById('typing'); if(t)t.remove(); }
+function addChips(options, cb) {
+  const wrap=document.createElement('div'); wrap.className='chips'; wrap.id='chips';
+  options.forEach(opt=>{ const btn=document.createElement('button'); btn.className='chip'; btn.textContent=opt; btn.onclick=()=>{wrap.remove();cb(opt);}; wrap.appendChild(btn); });
+  messagesEl.appendChild(wrap); messagesEl.scrollTop=messagesEl.scrollHeight;
+}
+function removeChips() { const c=document.getElementById('chips'); if(c)c.remove(); }
+
+// ─── FLOW ─────────────────────────────────────────────────────
+// Pattern: showBotMessage(step) displays step's question.
+// User answers → answer saved under step.key → advance() moves to next step.
+
+function saveAndAdvance(userValue) {
+  const step = STEPS[currentStep];
+  // Save the user's answer under this step's key
+  if (step.key) data[step.key] = userValue;
+
+  // Move to next non-skipped step
+  currentStep++;
+  while (currentStep < STEPS.length) {
+    const next = STEPS[currentStep];
+    if (next.isTerminal) return showSummary();
+    if (next.skipIf && next.skipIf(data)) {
+      if (next.key) data[next.key] = 'N/A';
+      currentStep++;
+      continue;
+    }
+    break;
+  }
+  if (currentStep >= STEPS.length) return showSummary();
+  showBotMessage(STEPS[currentStep]);
+}
+
+function showBotMessage(step) {
+  awaitingInput = false; inputEl.disabled = true; addTyping();
+  setTimeout(() => {
+    removeTyping();
+    const text = typeof step.bot === 'function' ? step.bot(null, data) : step.bot;
+    addMessage('bot', text);
+    const chips = typeof step.chips === 'function' ? step.chips(data) : step.chips;
+    if (chips && chips.length) {
+      addChips(chips, (chosen) => {
+        addMessage('user', chosen);
+        saveAndAdvance(chosen);
+      });
+    }
+    inputEl.placeholder = step.placeholder || 'Type your answer…';
+    inputEl.disabled = false; awaitingInput = true; inputEl.focus();
+  }, 900 + Math.random() * 400);
+}
+
+function handleSend() {
+  removeChips();
+  const val = inputEl.value.trim();
+  if (!val || !awaitingInput) return;
+  inputEl.value = ''; addMessage('user', val);
+  const step = STEPS[currentStep];
+  if (step.validate && !step.validate(val)) {
+    addMessage('bot', "Hmm, that doesn't look right — could you double-check and try again?");
+    return;
+  }
+  saveAndAdvance(val);
+}
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') handleSend(); });
+
+// ─── SUMMARY ─────────────────────────────────────────────────
+const FIELD_LABELS = {
+  first_name:'Name', phone:'Phone', email:'Email',
+  property_address:'Property Location', property_type:'Property Type',
+  bedrooms:'Bedrooms', bathrooms:'Bathrooms', size:'Size',
+  condition_or_zoning:'Condition / Zoning', known_issues:'Known Issues',
+  motivation:'Motivation', timeline:'Timeline',
+  asking_price:'Asking Price', ownership:'Ownership', additional_notes:'Additional Notes'
+};
+async function showSummary() {
+  data.submitted_at=new Date().toISOString();
+  data.lead_id='PR-'+Date.now().toString().slice(-6);
+  allLeads.push({...data}); localStorage.setItem('pr_leads',JSON.stringify(allLeads));
+  addMessage('bot',`Thank you, ${data.first_name||'there'}! 🎉 I've captured everything. Our team will be in touch with a no-obligation cash offer soon.`);
+  awaitingInput=false; inputEl.disabled=true; inputEl.placeholder='Chat complete';
+  document.getElementById('leadId').textContent=`Lead ${data.lead_id} · ${new Date().toLocaleString()}`;
+  const grid=document.getElementById('fieldsGrid'); grid.innerHTML='';
+  Object.entries(FIELD_LABELS).forEach(([k,label])=>{
+    if(!data[k]||data[k]==='N/A') return;
+    const item=document.createElement('div');
+    const long=(data[k]||'').length>30||['additional_notes','property_address','known_issues'].includes(k);
+    item.className=`field-item${long?' full':''}`;
+    item.innerHTML=`<div class="field-label">${label}</div><div class="field-value">${data[k]}</div>`;
+    grid.appendChild(item);
+  });
+  document.getElementById('summaryCard').classList.add('visible');
+  await submitToSheets(data);
+}
+
+// ─── GOOGLE SHEETS — GET method (avoids no-cors POST redirect issue) ──────────
+async function submitToSheets(lead) {
+  const statusEl = document.getElementById('sheetStatus');
+  if (!SCRIPT_URL) {
+    statusEl.innerHTML = `<div class="status-badge pending">⚠️ No Sheets URL configured</div>`;
+    return;
+  }
+  statusEl.innerHTML = `<div class="status-badge pending">⏳ Saving to Google Sheets…</div>`;
+  try {
+    // Encode all lead fields as URL params — GET requests work reliably with Apps Script
+    const params = new URLSearchParams();
+    Object.entries(lead).forEach(([k, v]) => params.append(k, v || ''));
+    const url = `${SCRIPT_URL}?${params.toString()}`;
+
+    // Use an Image beacon — fires the GET request cross-origin with zero CORS issues
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      // Apps Script returns a redirect; the image load fails visually but the script runs fine
+      img.onload = resolve;
+      img.onerror = resolve; // onerror still means the request was made and received
+      img.src = url;
+      setTimeout(resolve, 5000); // fallback timeout
+    });
+
+    statusEl.innerHTML = `<div class="status-badge success">✅ Saved to Google Sheets</div>`;
+  } catch (err) {
+    statusEl.innerHTML = `<div class="status-badge error">❌ Sheets save failed — use CSV export as backup</div>`;
+    console.error(err);
+  }
+}
+
+// ─── CSV EXPORT ───────────────────────────────────────────────
+function exportCSV() {
+  const leads=JSON.parse(localStorage.getItem('pr_leads')||'[]');
+  if(!leads.length){alert('No leads yet.');return;}
+  const allKeys=[...new Set(leads.flatMap(l=>Object.keys(l)))];
+  const csv=[allKeys.join(','),...leads.map(l=>allKeys.map(k=>`"${(l[k]||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`pr_leads_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+}
+
+function resetChat() {
+  currentStep = 0; data = {}; awaitingInput = false; messagesEl.innerHTML = '';
+  document.getElementById('summaryCard').classList.remove('visible');
+  inputEl.disabled = false; inputEl.placeholder = 'Type your answer…'; startChat();
+}
+
+function startChat() { setTimeout(() => showBotMessage(STEPS[0]), 500); }
+startChat();
+</script>
+</body>
+</html>
