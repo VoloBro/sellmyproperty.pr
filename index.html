@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sell Your Puerto Rico Property</title>
+<title>Vende Tu Propiedad en Puerto Rico</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -32,6 +32,8 @@
   .chat-header-info strong { display: block; font-size: 14px; font-weight: 500; color: var(--dark); }
   .chat-header-info span { font-size: 12px; color: #2a9a60; font-weight: 400; }
   .chat-header-info span::before { content: '●'; font-size: 8px; margin-right: 4px; }
+  .lang-toggle { margin-left: auto; padding: 5px 13px; border-radius: 20px; border: 1.5px solid var(--ocean); background: transparent; color: var(--ocean); font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+  .lang-toggle:hover { background: var(--ocean); color: #fff; }
 
   .messages { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
   .messages::-webkit-scrollbar { width: 4px; }
@@ -89,8 +91,6 @@
 
   .setup-banner { background:#fffbe6; border:1.5px solid #f0d060; border-radius:12px; padding:16px; margin-top:16px; font-size:13px; line-height:1.7; color:#5a4a00; }
   .setup-banner strong { display:block; font-size:14px; margin-bottom:8px; color:#3a3000; }
-  .setup-banner ol { padding-left:18px; margin-top:8px; }
-  .setup-banner li { margin-bottom:4px; }
   .setup-banner a { color:var(--ocean); }
   .config-row { display:flex; gap:8px; align-items:center; margin-top:10px; }
   .config-row input { flex:1; border:1.5px solid #e0c860; border-radius:8px; padding:8px 12px; font-size:13px; font-family:'DM Sans',sans-serif; background:#fffdf0; color:var(--dark); outline:none; }
@@ -103,13 +103,13 @@
 <body>
 
 <div class="hero">
-  <div class="hero-eyebrow">Puerto Rico Real Estate</div>
-  <h1>Get a <em>Fair Cash Offer</em><br>for Your Property</h1>
-  <p class="hero-sub">We buy distressed properties and land across Puerto Rico — fast closings, no repairs needed, no agent fees.</p>
+  <div class="hero-eyebrow">Bienes Raíces en Puerto Rico</div>
+  <h1>Recibe una <em>Oferta Justa</em><br>en Efectivo por Tu Propiedad</h1>
+  <p class="hero-sub">Compramos propiedades y terrenos en todo Puerto Rico — cierres rápidos, sin reparaciones, sin comisiones.</p>
   <div class="trust-bar">
-    <span class="trust-item">Cash buyers</span>
-    <span class="trust-item">Close in 14–30 days</span>
-    <span class="trust-item">No commissions</span>
+    <span class="trust-item">Compradores en efectivo</span>
+    <span class="trust-item">Cierre en 14–30 días</span>
+    <span class="trust-item">Sin comisiones</span>
   </div>
 </div>
 
@@ -118,13 +118,14 @@
     <div class="chat-header">
       <div class="avatar">🏡</div>
       <div class="chat-header-info">
-        <strong>Property Intake Assistant</strong>
-        <span>Online now</span>
+        <strong>Asistente de Propiedades</strong>
+        <span>En línea ahora</span>
       </div>
+      <button id="langToggle" class="lang-toggle" onclick="toggleLanguage()">English</button>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
-      <input type="text" id="userInput" placeholder="Type your answer…" autocomplete="off" />
+      <input type="text" id="userInput" placeholder="Escribe tu respuesta…" autocomplete="off" />
       <button class="send-btn" onclick="handleSend()">
         <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
       </button>
@@ -132,87 +133,182 @@
   </div>
 
   <div class="summary-card" id="summaryCard">
-    <div class="summary-title">📋 Lead Captured</div>
-    <div class="summary-subtitle" id="leadId"></div>
-    <div id="sheetStatus"></div>
-    <div class="fields-grid" id="fieldsGrid"></div>
     <div class="btn-row">
-      <button class="export-btn" onclick="exportCSV()">📥 Export All Leads to CSV</button>
-      <button class="new-lead-btn" onclick="resetChat()">Start New Lead</button>
+      <button class="new-lead-btn" onclick="resetChat()">Empezar Nuevo Caso</button>
     </div>
   </div>
 
-  <div class="setup-banner" id="setupBanner">
-    <strong>⚙️ Google Sheets Connected</strong>
-    Your Apps Script URL is pre-loaded. To change it, paste a new URL below and click Save.
-    <div class="config-row">
-      <input type="text" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/…/exec" />
-      <button onclick="saveScriptUrl()">Save URL</button>
-    </div>
-  </div>
+  <div id="setupTitle" style="display:none"></div>
+  <div id="setupDesc" style="display:none"></div>
+  <div id="saveUrlBtn" style="display:none"></div>
+  <input type="text" id="scriptUrlInput" style="display:none" />
 
-  <p class="disclaimer">By chatting, you agree your information may be used to evaluate a potential cash offer. We respect your privacy and never sell your data.</p>
+  <p class="disclaimer">Al chatear, aceptas que tu información puede usarse para evaluar una posible oferta en efectivo y puede ser compartida o vendida a terceros de confianza para ese fin. Respetamos tu privacidad.</p>
 </div>
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────
-// Pre-loaded URL — can be overridden via the setup panel
 const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwEKX4ucgvXTTF_K1NoD-MOyjdIi3ZWjH8pQbbvkw2WoJ5bf3s5XfPR6kKoMfJ0RBd0rA/exec';
 let SCRIPT_URL = localStorage.getItem('gs_script_url') || DEFAULT_URL;
 document.getElementById('scriptUrlInput').value = SCRIPT_URL;
 
 function saveScriptUrl() {
+  const T = TRANSLATIONS[currentLang];
   const val = document.getElementById('scriptUrlInput').value.trim();
-  if (!val.startsWith('https://script.google.com')) { alert('Not a valid Apps Script URL.'); return; }
+  if (!val.startsWith('https://script.google.com')) { alert(T.invalidUrl); return; }
   SCRIPT_URL = val;
   localStorage.setItem('gs_script_url', val);
-  alert('✅ URL saved!');
+  alert(T.urlSaved);
 }
 
 // ─── LAND DETECTION ──────────────────────────────────────────
 function isLand(type) {
   if (!type) return false;
   const t = type.toLowerCase();
-  return t.includes('land') || t.includes('lot') || t.includes('agricultural') || t.includes('parcel');
+  return t.includes('land') || t.includes('lot') || t.includes('agricultural') || t.includes('parcel') ||
+         t.includes('solar') || t.includes('lote') || t.includes('terreno') || t.includes('agr');
 }
 
-// ─── STEPS ───────────────────────────────────────────────────
-// Each step asks a question and saves the answer under its own `key`.
-// The bot message on the NEXT step may reference the answer just given via `data`.
-const STEPS = [
-  // Step 0 — asks for first name, saves as first_name
-  { key: "first_name", bot: "Hi there! 👋 Thanks for reaching out. I help connect property owners in Puerto Rico with our cash buying team.\n\nTo get started — what's your first name?", placeholder: "Your first name…" },
-  // Step 1 — asks for phone, greets by name
-  { key: "phone", bot: (v,d) => `Nice to meet you, ${d.first_name}! What's the best phone number to reach you?`, placeholder: "787-555-0100", validate: (v) => v.trim().length > 5 },
-  // Step 2 — asks for email
-  { key: "email", bot: "And your email address? (We'll send the written offer here)", placeholder: "you@email.com", validate: (v) => v.includes('@') },
-  // Step 3 — asks for property address
-  { key: "property_address", bot: "What's the address or location of the property? (Municipio is fine if no full address)", placeholder: "e.g. Fajardo, or 209 Tamarindo St, Fajardo" },
-  // Step 4 — asks for property type
-  { key: "property_type", bot: "What type of property is it?", placeholder: "Or type your own…", chips: ["Single-family home", "Duplex / Multi-unit", "Condo / Apartment", "Vacant land / Lot", "Agricultural land", "Commercial", "Other"] },
-  // Step 5 — bedrooms (skipped for land)
-  { key: "bedrooms", bot: "How many bedrooms does it have?", placeholder: "e.g. 3", chips: ["Studio / 0", "1", "2", "3", "4", "5+"], skipIf: (d) => isLand(d.property_type) },
-  // Step 6 — bathrooms (skipped for land)
-  { key: "bathrooms", bot: "And how many bathrooms?", placeholder: "e.g. 2", chips: ["1", "1.5", "2", "2.5", "3", "3+"], skipIf: (d) => isLand(d.property_type) },
-  // Step 7 — size (label/chips adapt for land)
-  { key: "size", bot: (v,d) => isLand(d.property_type) ? "Roughly how large is the parcel?" : "Roughly how large is the property?", placeholder: "e.g. 1,200 sq ft or 0.5 acres", chips: (d) => isLand(d.property_type) ? ["Under 500 sq m","500–2,000 sq m","Under 1 acre","1–5 acres","5–20 acres","20+ acres"] : ["Under 800 sq ft","800–1,500 sq ft","1,500–3,000 sq ft","Over 3,000 sq ft"] },
-  // Step 8 — condition/zoning (adapts for land)
-  { key: "condition_or_zoning", bot: (v,d) => isLand(d.property_type) ? "Is the land currently zoned or permitted for anything?" : "How would you describe the current condition?", placeholder: "Or describe…", chips: (d) => isLand(d.property_type) ? ["Residential zoning","Agricultural / rural","Commercial zoning","Mixed / unclear","Unknown"] : ["Move-in ready","Needs minor repairs","Needs major repairs / gut rehab","Vacant / abandoned","Storm or flood damage"] },
-  // Step 9 — known issues
-  { key: "known_issues", bot: "Any specific issues we should know about? (liens, title problems, access, utilities, legal disputes)", placeholder: "e.g. back taxes, no road access, title dispute…", chips: ["No major issues","Back taxes or liens","Title / legal issues","No road access","No utilities / off-grid","Septic or plumbing problems","Multiple issues"] },
-  // Step 10 — motivation
-  { key: "motivation", bot: "What's your main reason for selling?", placeholder: "Or describe…", chips: ["Relocating","Financial hardship","Inherited property","Divorce / estate","Too costly to maintain","Just exploring options"] },
-  // Step 11 — timeline
-  { key: "timeline", bot: "How quickly are you hoping to close?", placeholder: "Or describe…", chips: ["ASAP — within 30 days","1–3 months","3–6 months","Flexible / no rush"] },
-  // Step 12 — asking price
-  { key: "asking_price", bot: "Do you have a price in mind? (Fine if not)", placeholder: "e.g. $150,000 or 'not sure'", chips: ["Not sure","Under $100K","$100K–$200K","$200K–$400K","Over $400K"] },
-  // Step 13 — ownership
-  { key: "ownership", bot: "Are you the sole owner, or are others involved?", placeholder: "Or describe…", chips: ["Sole owner","Married — spouse co-owns","Multiple heirs","Co-owned with partner/investor","Estate / probate situation"] },
-  // Step 14 — additional notes
-  { key: "additional_notes", bot: (v,d) => `Almost done, ${d.first_name||'there'}! 🙌\n\nAnything else you'd like to share about the property or your situation?`, placeholder: "Any extra details (optional)…", chips: ["No, that covers it","Yes, let me add something"] },
-  // Step 15 — terminal, triggers summary
-  { key: null, isTerminal: true }
-];
+// ─── TRANSLATIONS ─────────────────────────────────────────────
+const TRANSLATIONS = {
+  es: {
+    htmlLang: 'es',
+    docTitle: 'Vende Tu Propiedad en Puerto Rico',
+    heroEyebrow: 'Bienes Raíces en Puerto Rico',
+    heroH1: 'Recibe una <em>Oferta Justa</em><br>en Efectivo por Tu Propiedad',
+    heroSub: 'Compramos propiedades y terrenos en todo Puerto Rico — cierres rápidos, sin reparaciones, sin comisiones.',
+    trustItems: ['Compradores en efectivo', 'Cierre en 14–30 días', 'Sin comisiones'],
+    assistantName: 'Asistente de Propiedades',
+    onlineNow: 'En línea ahora',
+    langBtnLabel: 'English',
+    defaultPlaceholder: 'Escribe tu respuesta…',
+    chatComplete: 'Chat completado',
+    validationError: 'Hmm, eso no parece correcto — ¿puedes verificarlo e intentarlo de nuevo?',
+    summaryTitle: '📋 Información Capturada',
+    thankYou: (name) => `¡Gracias, ${name||''}! 🎉 Hemos registrado todo. Nuestro equipo estará en contacto pronto con una oferta en efectivo sin compromiso.`,
+    exportBtn: '📥 Exportar Todos los Casos a CSV',
+    newLeadBtn: 'Empezar Nuevo Caso',
+    noLeads: 'No hay casos aún.',
+    setupTitle: '⚙️ Google Sheets Conectado',
+    setupDesc: 'Tu URL de Apps Script está precargada. Para cambiarla, pega una nueva URL abajo y haz clic en Guardar.',
+    saveBtnLabel: 'Guardar URL',
+    invalidUrl: 'No es una URL válida de Apps Script.',
+    urlSaved: '✅ ¡URL guardada!',
+    sheetSaving: '⏳ Guardando en Google Sheets…',
+    sheetSuccess: '✅ Guardado en Google Sheets',
+    sheetError: '❌ Error al guardar — usa la exportación CSV como respaldo',
+    sheetNoUrl: '⚠️ No hay URL de Sheets configurada',
+    disclaimer: 'Al chatear, aceptas que tu información puede usarse para evaluar una posible oferta en efectivo y puede ser compartida o vendida a terceros de confianza para ese fin. Respetamos tu privacidad.',
+    fieldLabels: {
+      first_name:'Nombre', phone:'Teléfono', email:'Correo',
+      property_address:'Ubicación de la Propiedad', property_type:'Tipo de Propiedad',
+      bedrooms:'Cuartos', bathrooms:'Baños', size:'Tamaño',
+      condition_or_zoning:'Condición / Zonificación', known_issues:'Problemas Conocidos',
+      motivation:'Motivación', timeline:'Plazo',
+      asking_price:'Precio Pedido', ownership:'Propietario(s)', additional_notes:'Notas Adicionales'
+    },
+    steps: [
+      { key: "first_name", bot: "¡Hola! 👋 Gracias por comunicarte. Conecto a dueños de propiedades en Puerto Rico con nuestro equipo de compradores en efectivo.\n\nPara empezar, ¿cuál es tu nombre?", placeholder: "Tu nombre…" },
+      { key: "phone", bot: (v,d) => `¡Mucho gusto, ${d.first_name}! ¿Cuál es el mejor número de teléfono para contactarte?`, placeholder: "787-555-0100", validate: (v) => v.trim().length > 5 },
+      { key: "email", bot: "¿Y tu correo electrónico? (Te enviaremos la oferta por escrito aquí)", placeholder: "tu@correo.com", validate: (v) => v.includes('@') },
+      { key: "property_address", bot: "¿Cuál es la dirección o ubicación de la propiedad? (El municipio está bien si no tienes la dirección completa)", placeholder: "ej. Fajardo, o Calle Tamarindo 209, Fajardo" },
+      { key: "property_type", bot: "¿Qué tipo de propiedad es?", placeholder: "O escribe el tuyo…", chips: ["Casa unifamiliar", "Dúplex / Multi-unidad", "Condo / Apartamento", "Solar / Lote vacío", "Terreno agrícola", "Comercial", "Otro"] },
+      { key: "bedrooms", bot: "¿Cuántos cuartos tiene?", placeholder: "ej. 3", chips: ["Estudio / 0","1","2","3","4","5+"], skipIf: (d) => isLand(d.property_type) },
+      { key: "bathrooms", bot: "¿Y cuántos baños?", placeholder: "ej. 2", chips: ["1","1.5","2","2.5","3","3+"], skipIf: (d) => isLand(d.property_type) },
+      { key: "size", bot: (v,d) => isLand(d.property_type) ? "¿Aproximadamente qué tan grande es el terreno?" : "¿Aproximadamente qué tan grande es el espacio habitable de la propiedad?", placeholder: "ej. 1,200 pies² o 0.5 cuerdas", chips: (d) => isLand(d.property_type) ? ["Menos de 500 m²","500–2,000 m²","Menos de 1 acre","1–5 acres","5–20 acres","20+ acres"] : ["Menos de 800 pies²","800–1,500 pies²","1,500–3,000 pies²","Más de 3,000 pies²"] },
+      { key: "condition_or_zoning", bot: (v,d) => isLand(d.property_type) ? "¿El terreno está zonificado o tiene algún permiso activo?" : "¿Cómo describirías el estado actual de la propiedad?", placeholder: "O describe…", chips: (d) => isLand(d.property_type) ? ["Zona residencial","Agrícola / rural","Zona comercial","Mixta / incierta","Desconocida"] : ["Lista para mudarse","Necesita reparaciones menores","Necesita reparaciones mayores / remodelación","Vacante / abandonada","Daños por huracán o inundación"] },
+      { key: "known_issues", bot: "¿Hay algún problema específico que debamos saber? (hipotecas, gravámenes, título, acceso, utilidades, disputas legales)", placeholder: "ej. contribuciones atrasadas, sin acceso por carretera, disputa de título…", chips: ["Sin problemas mayores","Contribuciones o gravámenes atrasados","Problemas de título / legales","Sin acceso por carretera","Sin utilidades / fuera de la red","Problemas de plomería o fosa séptica","Múltiples problemas"] },
+      { key: "motivation", bot: "¿Cuál es tu razón principal para vender?", placeholder: "O describe…", chips: ["Me estoy mudando","Dificultades económicas","Propiedad heredada","Divorcio / herencia","Muy costosa de mantener","Solo explorando opciones"] },
+      { key: "timeline", bot: "¿Qué tan rápido esperas cerrar?", placeholder: "O describe…", chips: ["Lo antes posible — dentro de 30 días","1–3 meses","3–6 meses","Flexible / sin prisa"] },
+      { key: "asking_price", bot: "¿Tienes un precio en mente? (Está bien si no lo sabes)", placeholder: "ej. $20,000 o 'no estoy seguro/a'", chips: ["No estoy seguro/a","$10,000–$50,000","$50,000–$100,000","$100,000–$200,000","Más de $200,000"] },
+      { key: "ownership", bot: "¿Eres el único dueño, o hay otros involucrados?", placeholder: "O describe…", chips: ["Único dueño","Casado/a — cónyuge co-dueño/a","Múltiples herederos","Co-dueño con socio/inversionista","Situación de sucesión / herencia"] },
+      { key: "additional_notes", bot: (v,d) => `¡Ya casi terminamos, ${d.first_name||''}! 🙌\n\n¿Hay algo más que quieras compartir sobre la propiedad o tu situación?`, placeholder: "Cualquier detalle adicional (opcional)…", chips: ["No, eso es todo"] },
+      { key: null, isTerminal: true }
+    ]
+  },
+  en: {
+    htmlLang: 'en',
+    docTitle: 'Sell Your Puerto Rico Property',
+    heroEyebrow: 'Puerto Rico Real Estate',
+    heroH1: 'Get a <em>Fair Cash Offer</em><br>for Your Property',
+    heroSub: 'We buy distressed properties and land across Puerto Rico — fast closings, no repairs needed, no agent fees.',
+    trustItems: ['Cash buyers', 'Close in 14–30 days', 'No commissions'],
+    assistantName: 'Property Intake Assistant',
+    onlineNow: 'Online now',
+    langBtnLabel: 'Español',
+    defaultPlaceholder: 'Type your answer…',
+    chatComplete: 'Chat complete',
+    validationError: "Hmm, that doesn't look right — could you double-check and try again?",
+    summaryTitle: '📋 Lead Captured',
+    thankYou: (name) => `Thank you, ${name||'there'}! 🎉 I've captured everything. Our team will be in touch with a no-obligation cash offer soon.`,
+    exportBtn: '📥 Export All Leads to CSV',
+    newLeadBtn: 'Start New Lead',
+    noLeads: 'No leads yet.',
+    setupTitle: '⚙️ Google Sheets Connected',
+    setupDesc: 'Your Apps Script URL is pre-loaded. To change it, paste a new URL below and click Save.',
+    saveBtnLabel: 'Save URL',
+    invalidUrl: 'Not a valid Apps Script URL.',
+    urlSaved: '✅ URL saved!',
+    sheetSaving: '⏳ Saving to Google Sheets…',
+    sheetSuccess: '✅ Saved to Google Sheets',
+    sheetError: '❌ Sheets save failed — use CSV export as backup',
+    sheetNoUrl: '⚠️ No Sheets URL configured',
+    disclaimer: 'By chatting, you agree your information may be used to evaluate a potential cash offer and may be shared or sold to trusted third parties for that purpose. We respect your privacy.',
+    fieldLabels: {
+      first_name:'Name', phone:'Phone', email:'Email',
+      property_address:'Property Location', property_type:'Property Type',
+      bedrooms:'Bedrooms', bathrooms:'Bathrooms', size:'Size',
+      condition_or_zoning:'Condition / Zoning', known_issues:'Known Issues',
+      motivation:'Motivation', timeline:'Timeline',
+      asking_price:'Asking Price', ownership:'Ownership', additional_notes:'Additional Notes'
+    },
+    steps: [
+      { key: "first_name", bot: "Hi there! 👋 Thanks for reaching out. I help connect property owners in Puerto Rico with our cash buying team.\n\nTo get started — what's your first and last name?", placeholder: "Your first name…" },
+      { key: "phone", bot: (v,d) => `Nice to meet you, ${d.first_name}! What's the best phone number to reach you?`, placeholder: "787-555-0100", validate: (v) => v.trim().length > 5 },
+      { key: "email", bot: "And your email address? (We'll send the written offer here)", placeholder: "you@email.com", validate: (v) => v.includes('@') },
+      { key: "property_address", bot: "What's the address or location of the property? (Municipio is fine if no full address)", placeholder: "e.g. Fajardo, or 209 Tamarindo St, Fajardo" },
+      { key: "property_type", bot: "What type of property is it?", placeholder: "Or type your own…", chips: ["Single-family home","Duplex / Multi-unit","Condo / Apartment","Vacant land / Lot","Agricultural land","Commercial","Other"] },
+      { key: "bedrooms", bot: "How many bedrooms does it have?", placeholder: "e.g. 3", chips: ["Studio / 0","1","2","3","4","5+"], skipIf: (d) => isLand(d.property_type) },
+      { key: "bathrooms", bot: "And how many bathrooms?", placeholder: "e.g. 2", chips: ["1","1.5","2","2.5","3","3+"], skipIf: (d) => isLand(d.property_type) },
+      { key: "size", bot: (v,d) => isLand(d.property_type) ? "Roughly how large is the parcel?" : "Roughly how large is the property living space?", placeholder: "e.g. 1,200 sq ft or 0.5 acres", chips: (d) => isLand(d.property_type) ? ["Under 500 sq m","500–2,000 sq m","Under 1 acre","1–5 acres","5–20 acres","20+ acres"] : ["Under 800 sq ft","800–1,500 sq ft","1,500–3,000 sq ft","Over 3,000 sq ft"] },
+      { key: "condition_or_zoning", bot: (v,d) => isLand(d.property_type) ? "Is the land currently zoned or permitted for anything?" : "How would you describe the current condition?", placeholder: "Or describe…", chips: (d) => isLand(d.property_type) ? ["Residential zoning","Agricultural / rural","Commercial zoning","Mixed / unclear","Unknown"] : ["Move-in ready","Needs minor repairs","Needs major repairs / gut rehab","Vacant / abandoned","Storm or flood damage"] },
+      { key: "known_issues", bot: "Any specific issues we should know about? (liens, title problems, access, utilities, legal disputes)", placeholder: "e.g. back taxes, no road access, title dispute…", chips: ["No major issues","Back taxes or liens","Title / legal issues","No road access","No utilities / off-grid","Septic or plumbing problems","Multiple issues"] },
+      { key: "motivation", bot: "What's your main reason for selling?", placeholder: "Or describe…", chips: ["Relocating","Financial hardship","Inherited property","Divorce / estate","Too costly to maintain","Just exploring options"] },
+      { key: "timeline", bot: "How quickly are you hoping to close?", placeholder: "Or describe…", chips: ["ASAP — within 30 days","1–3 months","3–6 months","Flexible / no rush"] },
+      { key: "asking_price", bot: "Do you have a price in mind? (Fine if not)", placeholder: "e.g. $20,000 or 'not sure'", chips: ["Not sure","$10,000–$50,000","$50,000–$100,000","$100,000–$200,000","Over $200,000"] },
+      { key: "ownership", bot: "Are you the sole owner, or are others involved?", placeholder: "Or describe…", chips: ["Sole owner","Married — spouse co-owns","Multiple heirs","Co-owned with partner/investor","Estate / probate situation"] },
+      { key: "additional_notes", bot: (v,d) => `Almost done, ${d.first_name||'there'}! 🙌\n\nAnything else you'd like to share about the property or your situation?`, placeholder: "Any extra details (optional)…", chips: ["No, that covers it"] },
+      { key: null, isTerminal: true }
+    ]
+  }
+};
+
+// ─── LANGUAGE ─────────────────────────────────────────────────
+let currentLang = localStorage.getItem('pr_lang') || 'es';
+
+function getSteps() { return TRANSLATIONS[currentLang].steps; }
+
+function applyLanguageToUI(lang) {
+  const T = TRANSLATIONS[lang];
+  document.documentElement.lang = T.htmlLang;
+  document.title = T.docTitle;
+  document.querySelector('.hero-eyebrow').textContent = T.heroEyebrow;
+  document.querySelector('.hero h1').innerHTML = T.heroH1;
+  document.querySelector('.hero-sub').textContent = T.heroSub;
+  document.querySelectorAll('.trust-item').forEach((el, i) => { if (T.trustItems[i]) el.textContent = T.trustItems[i]; });
+  document.querySelector('.chat-header-info strong').textContent = T.assistantName;
+  document.querySelector('.chat-header-info span').textContent = T.onlineNow;
+  document.getElementById('langToggle').textContent = T.langBtnLabel;
+  document.querySelector('.new-lead-btn').textContent = T.newLeadBtn;
+  document.querySelector('.disclaimer').textContent = T.disclaimer;
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === 'es' ? 'en' : 'es';
+  localStorage.setItem('pr_lang', currentLang);
+  applyLanguageToUI(currentLang);
+  resetChat();
+}
 
 // ─── STATE ────────────────────────────────────────────────────
 let currentStep = 0, data = {}, awaitingInput = false;
@@ -242,18 +338,14 @@ function addChips(options, cb) {
 function removeChips() { const c=document.getElementById('chips'); if(c)c.remove(); }
 
 // ─── FLOW ─────────────────────────────────────────────────────
-// Pattern: showBotMessage(step) displays step's question.
-// User answers → answer saved under step.key → advance() moves to next step.
-
 function saveAndAdvance(userValue) {
-  const step = STEPS[currentStep];
-  // Save the user's answer under this step's key
+  const steps = getSteps();
+  const step = steps[currentStep];
   if (step.key) data[step.key] = userValue;
 
-  // Move to next non-skipped step
   currentStep++;
-  while (currentStep < STEPS.length) {
-    const next = STEPS[currentStep];
+  while (currentStep < steps.length) {
+    const next = steps[currentStep];
     if (next.isTerminal) return showSummary();
     if (next.skipIf && next.skipIf(data)) {
       if (next.key) data[next.key] = 'N/A';
@@ -262,8 +354,8 @@ function saveAndAdvance(userValue) {
     }
     break;
   }
-  if (currentStep >= STEPS.length) return showSummary();
-  showBotMessage(STEPS[currentStep]);
+  if (currentStep >= steps.length) return showSummary();
+  showBotMessage(steps[currentStep]);
 }
 
 function showBotMessage(step) {
@@ -279,7 +371,7 @@ function showBotMessage(step) {
         saveAndAdvance(chosen);
       });
     }
-    inputEl.placeholder = step.placeholder || 'Type your answer…';
+    inputEl.placeholder = step.placeholder || TRANSLATIONS[currentLang].defaultPlaceholder;
     inputEl.disabled = false; awaitingInput = true; inputEl.focus();
   }, 900 + Math.random() * 400);
 }
@@ -289,9 +381,9 @@ function handleSend() {
   const val = inputEl.value.trim();
   if (!val || !awaitingInput) return;
   inputEl.value = ''; addMessage('user', val);
-  const step = STEPS[currentStep];
+  const step = getSteps()[currentStep];
   if (step.validate && !step.validate(val)) {
-    addMessage('bot', "Hmm, that doesn't look right — could you double-check and try again?");
+    addMessage('bot', TRANSLATIONS[currentLang].validationError);
     return;
   }
   saveAndAdvance(val);
@@ -299,61 +391,32 @@ function handleSend() {
 inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') handleSend(); });
 
 // ─── SUMMARY ─────────────────────────────────────────────────
-const FIELD_LABELS = {
-  first_name:'Name', phone:'Phone', email:'Email',
-  property_address:'Property Location', property_type:'Property Type',
-  bedrooms:'Bedrooms', bathrooms:'Bathrooms', size:'Size',
-  condition_or_zoning:'Condition / Zoning', known_issues:'Known Issues',
-  motivation:'Motivation', timeline:'Timeline',
-  asking_price:'Asking Price', ownership:'Ownership', additional_notes:'Additional Notes'
-};
 async function showSummary() {
+  const T = TRANSLATIONS[currentLang];
   data.submitted_at=new Date().toISOString();
   data.lead_id='PR-'+Date.now().toString().slice(-6);
   allLeads.push({...data}); localStorage.setItem('pr_leads',JSON.stringify(allLeads));
-  addMessage('bot',`Thank you, ${data.first_name||'there'}! 🎉 I've captured everything. Our team will be in touch with a no-obligation cash offer soon.`);
-  awaitingInput=false; inputEl.disabled=true; inputEl.placeholder='Chat complete';
-  document.getElementById('leadId').textContent=`Lead ${data.lead_id} · ${new Date().toLocaleString()}`;
-  const grid=document.getElementById('fieldsGrid'); grid.innerHTML='';
-  Object.entries(FIELD_LABELS).forEach(([k,label])=>{
-    if(!data[k]||data[k]==='N/A') return;
-    const item=document.createElement('div');
-    const long=(data[k]||'').length>30||['additional_notes','property_address','known_issues'].includes(k);
-    item.className=`field-item${long?' full':''}`;
-    item.innerHTML=`<div class="field-label">${label}</div><div class="field-value">${data[k]}</div>`;
-    grid.appendChild(item);
-  });
+  addMessage('bot', T.thankYou(data.first_name));
+  awaitingInput=false; inputEl.disabled=true; inputEl.placeholder=T.chatComplete;
   document.getElementById('summaryCard').classList.add('visible');
   await submitToSheets(data);
 }
 
-// ─── GOOGLE SHEETS — GET method (avoids no-cors POST redirect issue) ──────────
+// ─── GOOGLE SHEETS ────────────────────────────────────────────
 async function submitToSheets(lead) {
-  const statusEl = document.getElementById('sheetStatus');
-  if (!SCRIPT_URL) {
-    statusEl.innerHTML = `<div class="status-badge pending">⚠️ No Sheets URL configured</div>`;
-    return;
-  }
-  statusEl.innerHTML = `<div class="status-badge pending">⏳ Saving to Google Sheets…</div>`;
+  if (!SCRIPT_URL) return;
   try {
-    // Encode all lead fields as URL params — GET requests work reliably with Apps Script
     const params = new URLSearchParams();
     Object.entries(lead).forEach(([k, v]) => params.append(k, v || ''));
     const url = `${SCRIPT_URL}?${params.toString()}`;
-
-    // Use an Image beacon — fires the GET request cross-origin with zero CORS issues
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       const img = new Image();
-      // Apps Script returns a redirect; the image load fails visually but the script runs fine
       img.onload = resolve;
-      img.onerror = resolve; // onerror still means the request was made and received
+      img.onerror = resolve;
       img.src = url;
-      setTimeout(resolve, 5000); // fallback timeout
+      setTimeout(resolve, 5000);
     });
-
-    statusEl.innerHTML = `<div class="status-badge success">✅ Saved to Google Sheets</div>`;
   } catch (err) {
-    statusEl.innerHTML = `<div class="status-badge error">❌ Sheets save failed — use CSV export as backup</div>`;
     console.error(err);
   }
 }
@@ -361,7 +424,7 @@ async function submitToSheets(lead) {
 // ─── CSV EXPORT ───────────────────────────────────────────────
 function exportCSV() {
   const leads=JSON.parse(localStorage.getItem('pr_leads')||'[]');
-  if(!leads.length){alert('No leads yet.');return;}
+  if(!leads.length){alert(TRANSLATIONS[currentLang].noLeads);return;}
   const allKeys=[...new Set(leads.flatMap(l=>Object.keys(l)))];
   const csv=[allKeys.join(','),...leads.map(l=>allKeys.map(k=>`"${(l[k]||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
@@ -369,12 +432,17 @@ function exportCSV() {
 }
 
 function resetChat() {
+  const T = TRANSLATIONS[currentLang];
   currentStep = 0; data = {}; awaitingInput = false; messagesEl.innerHTML = '';
   document.getElementById('summaryCard').classList.remove('visible');
-  inputEl.disabled = false; inputEl.placeholder = 'Type your answer…'; startChat();
+  inputEl.disabled = false; inputEl.placeholder = T.defaultPlaceholder;
+  startChat();
 }
 
-function startChat() { setTimeout(() => showBotMessage(STEPS[0]), 500); }
+function startChat() { setTimeout(() => showBotMessage(getSteps()[0]), 500); }
+
+// ─── INIT ─────────────────────────────────────────────────────
+applyLanguageToUI(currentLang);
 startChat();
 </script>
 </body>
