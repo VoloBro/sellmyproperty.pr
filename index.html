@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vende Tu Propiedad en Puerto Rico</title>
+<!-- Google Analytics — replace G-GYNZ2RLK4P with your Measurement ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GYNZ2RLK4P"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GYNZ2RLK4P');
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -337,11 +345,28 @@ function addChips(options, cb) {
 }
 function removeChips() { const c=document.getElementById('chips'); if(c)c.remove(); }
 
+// ─── ANALYTICS ────────────────────────────────────────────────
+function trackEvent(name, params) {
+  if (typeof gtag === 'function') gtag('event', name, params);
+}
+
+// Fire abandonment event when user leaves mid-quiz
+let _quizAbandoned = false;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && awaitingInput && !_quizAbandoned) {
+    _quizAbandoned = true;
+    trackEvent('quiz_abandoned', { steps_completed: currentStep, lang: currentLang });
+  }
+});
+
 // ─── FLOW ─────────────────────────────────────────────────────
 function saveAndAdvance(userValue) {
   const steps = getSteps();
   const step = steps[currentStep];
-  if (step.key) data[step.key] = userValue;
+  if (step.key) {
+    data[step.key] = userValue;
+    trackEvent('question_answered', { question_key: step.key, step_number: currentStep + 1, lang: currentLang });
+  }
 
   currentStep++;
   while (currentStep < steps.length) {
@@ -393,6 +418,8 @@ inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') handleSend(); 
 // ─── SUMMARY ─────────────────────────────────────────────────
 async function showSummary() {
   const T = TRANSLATIONS[currentLang];
+  _quizAbandoned = true; // prevent duplicate abandonment event
+  trackEvent('quiz_completed', { total_steps: getSteps().filter(s => s.key).length, lang: currentLang });
   data.submitted_at=new Date().toISOString();
   data.lead_id='PR-'+Date.now().toString().slice(-6);
   allLeads.push({...data}); localStorage.setItem('pr_leads',JSON.stringify(allLeads));
