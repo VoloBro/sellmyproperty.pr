@@ -366,6 +366,7 @@ function saveAndAdvance(userValue) {
   if (step.key) {
     data[step.key] = userValue;
     trackEvent('question_answered', { question_key: step.key, step_number: currentStep + 1, lang: currentLang });
+    submitToSheets(data);
   }
 
   currentStep++;
@@ -421,7 +422,6 @@ async function showSummary() {
   _quizAbandoned = true; // prevent duplicate abandonment event
   trackEvent('quiz_completed', { total_steps: getSteps().filter(s => s.key).length, lang: currentLang });
   data.submitted_at=new Date().toISOString();
-  data.lead_id='PR-'+Date.now().toString().slice(-6);
   allLeads.push({...data}); localStorage.setItem('pr_leads',JSON.stringify(allLeads));
   addMessage('bot', T.thankYou(data.first_name));
   awaitingInput=false; inputEl.disabled=true; inputEl.placeholder=T.chatComplete;
@@ -460,7 +460,8 @@ function exportCSV() {
 
 function resetChat() {
   const T = TRANSLATIONS[currentLang];
-  currentStep = 0; data = {}; awaitingInput = false; messagesEl.innerHTML = '';
+  currentStep = 0; awaitingInput = false; messagesEl.innerHTML = '';
+  data = { lead_id: 'PR-' + Date.now().toString().slice(-6) };
   document.getElementById('summaryCard').classList.remove('visible');
   inputEl.disabled = false; inputEl.placeholder = T.defaultPlaceholder;
   startChat();
