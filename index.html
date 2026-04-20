@@ -319,7 +319,7 @@ function toggleLanguage() {
 }
 
 // ─── STATE ────────────────────────────────────────────────────
-let currentStep = 0, data = {}, awaitingInput = false;
+let currentStep = 0, data = { lead_id: 'PR-' + Date.now().toString().slice(-6) }, awaitingInput = false;
 let allLeads = JSON.parse(localStorage.getItem('pr_leads') || '[]');
 const messagesEl = document.getElementById('messages');
 const inputEl = document.getElementById('userInput');
